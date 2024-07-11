@@ -8,15 +8,23 @@
 inline glm::vec3 **generate_sphere_points(int resolution, float radius) {
   glm::vec3 **arr = new glm::vec3 *[resolution];
 
-  for (int i = 0; i < resolution; ++i) {
+  for (unsigned int i = 0; i < resolution; ++i) {
     arr[i] = new glm::vec3[resolution];
-    for (int j = 0; j < resolution; ++j) {
-      float lon = (j / resolution) * (glm::pi<float>() / 2);
-      float lat = (i / resolution) * (glm::pi<float>());
+    for (unsigned int j = 0; j < resolution; ++j) {
+      // low2 + (value - low1) * (high2 - low2) / (high1 - low1)
+
+      // lon = 0,res -> 0, pi/2
+      float lon = ((j) * (glm::pi<float>() / 2)) / resolution;
+
+      // lat = 0,res -> 0,pi
+      float lat = ((i) * (glm::pi<float>())) / resolution;
 
       float x = radius * sin(lon) * cos(lat);
       float y = radius * sin(lon) * sin(lat);
       float z = radius * cos(lon);
+
+      std::cout << "lat: " << lat << " long: " << lon << std::endl;
+      std::cout << "x: " << x << " y: " << y << " z: " << z << std::endl;
 
       glm::vec3 v = glm::vec3(x, y, z);
       arr[i][j] = v;
@@ -42,22 +50,23 @@ inline cgra::mesh_builder create_sphere(int resolution, float radius) {
 
   int count = 0;
 
-  for (int i = 0; i < resolution - 1; i++) {
-    for (int j = 0; j < resolution; j++) {
+  for (unsigned int i = 0; i < resolution - 1; i++) {
+    for (unsigned int j = 0; j < resolution; j++) {
 
       // index = j ^ (j+1) + (i*2)
-      std::cout << count << std::endl;
       mb.push_index(count);
       mb.push_index(count + 1);
 
       // positions
-      glm::vec3 point1 = points[i][j];
-      glm::vec3 point2 = points[i + 1][j];
+      glm::vec3 point1 = points[j][i];
+      glm::vec3 point2 = points[j][i + 1];
 
       // calulate normals
 
-      mb.push_vertex(cgra::mesh_vertex{point1, glm::vec3(1), glm::vec3(0)});
-      mb.push_vertex(cgra::mesh_vertex{point2, glm::vec3(1), glm::vec3(0)});
+      mb.push_vertex(
+          cgra::mesh_vertex{point1, glm::vec3(1, 0, 0), glm::vec3(0)});
+      mb.push_vertex(
+          cgra::mesh_vertex{point2, glm::vec3(1, 0, 0), glm::vec3(0)});
 
       count += 2;
     }

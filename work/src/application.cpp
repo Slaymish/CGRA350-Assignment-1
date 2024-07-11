@@ -51,7 +51,7 @@ Application::Application(GLFWwindow *window) : m_window(window) {
           .build();
   m_model.color = vec3(1, 0, 0);
 
-  int resolution = 10;
+  int resolution = 100;
   float radius = 100;
 
   sphere.shader = shader;
