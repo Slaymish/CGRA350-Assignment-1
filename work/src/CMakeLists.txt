@@ -20,6 +20,8 @@ SET(sources
 	"main.cpp"
 
 	"CMakeLists.txt"
+
+	"sphere.hpp"
 )
 
 # Add executable target and link libraries
