@@ -1,78 +1,45 @@
 #pragma once
 
+#include "cgra/cgra_mesh.hpp"
 #include <vector>
 
-// project
-#include "cgra/cgra_mesh.hpp"
+// this needs to be the last import to compile for some reason lul
+#include "basic_model.hpp"
 
-inline glm::vec3 **generate_sphere_points(int resolution, float radius) {
-  glm::vec3 **arr = new glm::vec3 *[resolution];
+/*
+  1. generate points at specified res/rad
+  2. given m_points, create triangles
+  3. rebuild cgra_mesh
+  4. then assign to m_model.mesh
+*/
+class Sphere {
 
-  for (unsigned int i = 0; i < resolution; ++i) {
-    arr[i] = new glm::vec3[resolution];
-    for (unsigned int j = 0; j < resolution; ++j) {
-      // low2 + (value - low1) * (high2 - low2) / (high1 - low1)
+public:
+  int m_resolution = 10;
+  float m_radius = 20;
 
-      // lon = 0,res -> 0, pi/2
-      float lon = ((j) * (glm::pi<float>() / 2)) / resolution;
-
-      // lat = 0,res -> 0,pi
-      float lat = ((i) * (glm::pi<float>())) / resolution;
-
-      float x = radius * sin(lon) * cos(lat);
-      float y = radius * sin(lon) * sin(lat);
-      float z = radius * cos(lon);
-
-      std::cout << "lat: " << lat << " long: " << lon << std::endl;
-      std::cout << "x: " << x << " y: " << y << " z: " << z << std::endl;
-
-      glm::vec3 v = glm::vec3(x, y, z);
-      arr[i][j] = v;
-    }
+  Sphere(GLuint shader, glm::vec3 color) {
+    m_model.shader = shader;
+    m_model.color = color;
+    update();
   }
 
-  return arr;
-}
+  // These update the member vars, then rebuild the sphere
+  void draw(const glm::mat4 &view, const glm::mat4 proj);
 
-inline cgra::mesh_builder create_sphere(int resolution, float radius) {
+  // recreates and assigns m_mesh with current res/rad members
+  void update();
 
-  // generate sphere points
-  glm::vec3 **points;
-  points = generate_sphere_points(resolution, radius);
+  ~Sphere();
 
-  std::cout << "points generated" << std::endl;
+private:
+  glm::vec3 **m_points;
+  cgra::mesh_builder m_mb;
+  basic_model m_model;
 
-  // if we don't have any normals, create them naively
-  // todo create spherical UV's if they don't exist
+  void latLongToCartesian(float lat, float lon, float &x, float &y, float &z);
+  void generateSpherePoints();
 
-  // create mesh data
-  cgra::mesh_builder mb;
-
-  int count = 0;
-
-  for (unsigned int i = 0; i < resolution - 1; i++) {
-    for (unsigned int j = 0; j < resolution; j++) {
-
-      // index = j ^ (j+1) + (i*2)
-      mb.push_index(count);
-      mb.push_index(count + 1);
-
-      // positions
-      glm::vec3 point1 = points[j][i];
-      glm::vec3 point2 = points[j][i + 1];
-
-      // calulate normals
-
-      mb.push_vertex(
-          cgra::mesh_vertex{point1, glm::vec3(1, 0, 0), glm::vec3(0)});
-      mb.push_vertex(
-          cgra::mesh_vertex{point2, glm::vec3(1, 0, 0), glm::vec3(0)});
-
-      count += 2;
-    }
-  }
-
-  std::cout << "meshbuilder made" << std::endl;
-
-  return mb;
-}
+  void createSphere();
+  void makeIndices();
+};
