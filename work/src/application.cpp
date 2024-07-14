@@ -16,9 +16,6 @@
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
 
-// Mine
-#include "sphere.hpp"
-
 using namespace std;
 using namespace cgra;
 using namespace glm;
@@ -36,28 +33,17 @@ void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
   mesh.draw(); // draw
 }
 
-Application::Application(GLFWwindow *window) : m_window(window) {
-
+GLuint Application::createShader() {
   shader_builder sb;
   sb.set_shader(GL_VERTEX_SHADER,
                 CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
   sb.set_shader(GL_FRAGMENT_SHADER,
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
-  GLuint shader = sb.build();
-
-  m_model.shader = shader;
-  m_model.mesh =
-      load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
-          .build();
-  m_model.color = vec3(1, 0, 0);
-
-  int resolution = 100;
-  float radius = 100;
-
-  sphere.shader = shader;
-  sphere.mesh = create_sphere(resolution, radius).build();
-  sphere.color = vec3(0, 0, 1); // blue sphere
+  return sb.build();
 }
+
+Application::Application(GLFWwindow *window)
+    : m_window(window), sphere(createShader(), vec3(1, 0, 0)) {}
 
 void Application::render() {
 
@@ -125,10 +111,18 @@ void Application::renderGUI() {
 
   ImGui::Separator();
 
-  // example of how to use input boxes
-  static float exampleInput;
-  if (ImGui::InputFloat("example input", &exampleInput)) {
-    cout << "example input changed to " << exampleInput << endl;
+  if (ImGui::SliderFloat("Radius", &sphere.m_radius, 1.0F, 100.0F)) {
+    if (sphere.m_radius <= 0) {
+      sphere.m_radius = 0.1;
+    }
+    sphere.update();
+  }
+
+  if (ImGui::InputInt("Resolution", &sphere.m_resolution)) {
+    if (sphere.m_resolution <= 0) {
+      sphere.m_resolution = 1;
+    }
+    sphere.update();
   }
 
   // finish creating window
