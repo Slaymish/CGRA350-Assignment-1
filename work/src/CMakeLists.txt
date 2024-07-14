@@ -22,6 +22,9 @@ SET(sources
 	"CMakeLists.txt"
 
 	"sphere.hpp"
+	"sphere.cpp"
+
+	"basic_model.hpp"
 )
 
 # Add executable target and link libraries
