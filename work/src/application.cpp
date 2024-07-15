@@ -109,31 +109,59 @@ void Application::renderGUI() {
   if (ImGui::Button("Screenshot"))
     rgba_image::screenshot(true);
 
+  if (ImGui::Button("Core")) {
+    setStage(0);
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Completion")) {
+    setStage(1);
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Challenge")) {
+    setStage(2);
+  }
+
   ImGui::Separator();
 
-  if (ImGui::SliderFloat("Radius", &sphere.m_radius, 1.0F, 100.0F)) {
-    if (sphere.m_radius <= 0) {
-      sphere.m_radius = 0.1;
+  switch (m_stage) {
+  case 0:
+    ImGui::Text("Core");
+    if (ImGui::SliderFloat("Radius", &sphere.m_radius, 1.0F, 100.0F)) {
+      if (sphere.m_radius <= 0) {
+        sphere.m_radius = 0.1;
+      }
+      sphere.update();
     }
-    sphere.update();
-  }
 
-  if (ImGui::InputInt("Longitude Divisions", &sphere.m_longResolution)) {
-    if (sphere.m_longResolution <= 0) {
-      sphere.m_longResolution = 1;
+    if (ImGui::InputInt("Longitude Divisions", &sphere.m_longResolution)) {
+      if (sphere.m_longResolution <= 0) {
+        sphere.m_longResolution = 1;
+      }
+      sphere.update();
     }
-    sphere.update();
-  }
 
-  if (ImGui::InputInt("Latitude Divisions", &sphere.m_latResolution)) {
-    if (sphere.m_latResolution <= 0) {
-      sphere.m_latResolution = 1;
+    if (ImGui::InputInt("Latitude Divisions", &sphere.m_latResolution)) {
+      if (sphere.m_latResolution <= 0) {
+        sphere.m_latResolution = 1;
+      }
+      sphere.update();
     }
-    sphere.update();
-  }
 
-  if (ImGui::Checkbox("Funky Sphere", &sphere.m_isFunkySphere)) {
-    sphere.update();
+    if (ImGui::Checkbox("Funky Sphere", &sphere.m_isFunkySphere)) {
+      sphere.update();
+    }
+    break;
+  case 1:
+    ImGui::Text("Completion");
+    static float sphereness = 0;
+    if (ImGui::SliderFloat("Sphereness", &sphereness, 0, 1)) {
+      sphere.update();
+    }
+    break;
+  case 2:
+    ImGui::Text("Challenge");
+
+    break;
   }
 
   // finish creating window
@@ -187,3 +215,5 @@ void Application::keyCallback(int key, int scancode, int action, int mods) {
 void Application::charCallback(unsigned int c) {
   (void)c; // currently un-used
 }
+
+void Application::setStage(int i) { m_stage = i; }

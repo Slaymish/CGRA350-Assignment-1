@@ -45,6 +45,9 @@ private:
 
   Sphere sphere;
 
+  // Core/Completion/Challenge (0,1,2)
+  int m_stage = 0;
+
 public:
   // setup
   Application(GLFWwindow *);
@@ -64,4 +67,5 @@ public:
   void scrollCallback(double xoffset, double yoffset);
   void keyCallback(int key, int scancode, int action, int mods);
   void charCallback(unsigned int c);
+  void setStage(int i);
 };
