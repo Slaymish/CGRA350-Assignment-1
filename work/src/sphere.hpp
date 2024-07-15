@@ -15,7 +15,8 @@
 class Sphere {
 
 public:
-  int m_resolution = 10;
+  int m_longResolution = 10;
+  int m_latResolution = 10;
   float m_radius = 20;
   bool m_isFunkySphere = false;
 

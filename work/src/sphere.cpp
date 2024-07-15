@@ -18,23 +18,24 @@ void Sphere::latLongToFunky(float lat, float lon, float &x, float &y, float &z,
 }
 
 void Sphere::generateSpherePoints() {
-  glm::vec3 **arr = new glm::vec3 *[m_resolution + 1];
+  glm::vec3 **arr = new glm::vec3 *[m_latResolution + 1];
 
-  for (int j = 0; j <= m_resolution; j++) {
-    arr[j] = new glm::vec3[m_resolution + 1];
-    for (int i = 0; i <= m_resolution; i++) {
+  for (int j = 0; j <= m_latResolution; j++) {
+    arr[j] = new glm::vec3[m_latResolution + 1];
+    for (int i = 0; i <= m_longResolution; i++) {
       // lon = 0,res -> 0, pi/2
-      float lon = (i * 2 * glm::pi<float>()) / m_resolution;
+      float lon = (i * 2 * glm::pi<float>()) / m_longResolution;
 
       // lat = 0,res -> 0,pi
-      float lat = (j * glm::pi<float>() / m_resolution) - glm::half_pi<float>();
+      float lat =
+          (j * glm::pi<float>() / m_latResolution) - glm::half_pi<float>();
 
       float x, y, z;
 
       if (!m_isFunkySphere)
         latLongToCartesian(lat, lon, x, y, z);
       else {
-        float scale = sin(lon);
+        float scale = sin(lon) * cos(lat);
         latLongToFunky(lat, lon, x, y, z, scale);
       }
 
@@ -46,10 +47,10 @@ void Sphere::generateSpherePoints() {
 }
 
 void Sphere::makeIndices() {
-  for (int j = 0; j <= m_resolution; j++) {
-    for (int i = 0; i <= m_resolution; i++) {
-      int i1 = j * (m_resolution + 1) + i;
-      int i2 = (j + 1) * (m_resolution + 1) + i;
+  for (int j = 0; j <= m_latResolution; j++) {
+    for (int i = 0; i <= m_longResolution; i++) {
+      int i1 = j * (m_longResolution + 1) + i;
+      int i2 = (j + 1) * (m_longResolution + 1) + i; // mayb change to longRes
       int i3 = i1 + 1;
       int i4 = i2 + 1;
 
@@ -65,8 +66,8 @@ void Sphere::makeIndices() {
 }
 
 void Sphere::createSphere() {
-  for (int j = 0; j <= m_resolution; j++) {
-    for (int i = 0; i <= m_resolution; i++) {
+  for (int j = 0; j <= m_latResolution; j++) {
+    for (int i = 0; i <= m_longResolution; i++) {
       // positions
       glm::vec3 point = m_points[j][i];
 
@@ -74,19 +75,19 @@ void Sphere::createSphere() {
       glm::vec3 normal = glm::normalize(point);
 
       // calculate texture coordinates
-      float u = static_cast<float>(i) / (m_resolution);
-      float v = static_cast<float>(j) / (m_resolution);
+      float u = static_cast<float>(i) / (m_longResolution);
+      float v = static_cast<float>(j) / (m_latResolution);
 
       m_mb.push_vertex(cgra::mesh_vertex{point, normal, glm::vec2(u, v)});
     }
   }
 
   // Add the last ring of vertices
-  int j = m_resolution;
-  for (int i = 0; i <= m_resolution; i++) {
+  int j = m_latResolution;
+  for (int i = 0; i <= m_longResolution; i++) {
     glm::vec3 point = m_points[j][i];
     glm::vec3 normal = glm::normalize(point);
-    float u = static_cast<float>(i) / (m_resolution);
+    float u = static_cast<float>(i) / (m_longResolution);
     float v = 1.0f;
 
     m_mb.push_vertex(cgra::mesh_vertex{point, normal, glm::vec2(u, v)});
@@ -107,7 +108,7 @@ void Sphere::draw(const glm::mat4 &view, const glm::mat4 proj) {
 }
 
 Sphere::~Sphere() {
-  for (int j = 0; j <= m_resolution; j++) {
+  for (int j = 0; j <= m_latResolution; j++) {
     delete[] m_points[j];
   }
   delete[] m_points;

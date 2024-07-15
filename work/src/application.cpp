@@ -118,9 +118,16 @@ void Application::renderGUI() {
     sphere.update();
   }
 
-  if (ImGui::InputInt("Resolution", &sphere.m_resolution)) {
-    if (sphere.m_resolution <= 0) {
-      sphere.m_resolution = 1;
+  if (ImGui::InputInt("Longitude Divisions", &sphere.m_longResolution)) {
+    if (sphere.m_longResolution <= 0) {
+      sphere.m_longResolution = 1;
+    }
+    sphere.update();
+  }
+
+  if (ImGui::InputInt("Latitude Divisions", &sphere.m_latResolution)) {
+    if (sphere.m_latResolution <= 0) {
+      sphere.m_latResolution = 1;
     }
     sphere.update();
   }
