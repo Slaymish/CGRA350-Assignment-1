@@ -17,6 +17,7 @@ class Sphere {
 public:
   int m_resolution = 10;
   float m_radius = 20;
+  bool m_isFunkySphere = false;
 
   Sphere(GLuint shader, glm::vec3 color) {
     m_model.shader = shader;
@@ -37,8 +38,13 @@ private:
   cgra::mesh_builder m_mb;
   basic_model m_model;
 
+  // 0 == regular sphere, 1 == funky sphere
+
   void latLongToCartesian(float lat, float lon, float &x, float &y, float &z);
   void generateSpherePoints();
+
+  void latLongToFunky(float lat, float lon, float &x, float &y, float &z,
+                      float scale);
 
   void createSphere();
   void makeIndices();

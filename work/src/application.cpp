@@ -125,6 +125,10 @@ void Application::renderGUI() {
     sphere.update();
   }
 
+  if (ImGui::Checkbox("Funky Sphere", &sphere.m_isFunkySphere)) {
+    sphere.update();
+  }
+
   // finish creating window
   ImGui::End();
 }

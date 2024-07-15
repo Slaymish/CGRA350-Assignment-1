@@ -8,6 +8,15 @@ void Sphere::latLongToCartesian(float lat, float lon, float &x, float &y,
   z = m_radius * sin(lat);
 }
 
+void Sphere::latLongToFunky(float lat, float lon, float &x, float &y, float &z,
+                            float scale) {
+
+  float adjustedRadius = scale * m_radius;
+  x = adjustedRadius * cos(lat) * cos(lon);
+  y = adjustedRadius * cos(lat) * sin(lon);
+  z = adjustedRadius * sin(lat);
+}
+
 void Sphere::generateSpherePoints() {
   glm::vec3 **arr = new glm::vec3 *[m_resolution + 1];
 
@@ -21,7 +30,13 @@ void Sphere::generateSpherePoints() {
       float lat = (j * glm::pi<float>() / m_resolution) - glm::half_pi<float>();
 
       float x, y, z;
-      latLongToCartesian(lat, lon, x, y, z);
+
+      if (!m_isFunkySphere)
+        latLongToCartesian(lat, lon, x, y, z);
+      else {
+        float scale = sin(lon);
+        latLongToFunky(lat, lon, x, y, z, scale);
+      }
 
       arr[j][i] = glm::vec3(x, y, z);
     }
