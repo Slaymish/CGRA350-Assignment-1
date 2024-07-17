@@ -123,6 +123,8 @@ void Application::renderGUI() {
 
   ImGui::Separator();
 
+  static float sphereness = 0;
+
   switch (m_stage) {
   case 0:
     ImGui::Text("Core");
@@ -153,7 +155,7 @@ void Application::renderGUI() {
     break;
   case 1:
     ImGui::Text("Completion");
-    static float sphereness = 0;
+
     if (ImGui::SliderFloat("Sphereness", &sphereness, 0, 1)) {
       sphere.update();
     }

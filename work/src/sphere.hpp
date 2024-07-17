@@ -32,8 +32,6 @@ public:
   // recreates and assigns m_mesh with current res/rad members
   void update();
 
-  ~Sphere();
-
 private:
   glm::vec3 **m_points;
   cgra::mesh_builder m_mb;
@@ -49,4 +47,5 @@ private:
 
   void createSphere();
   void makeIndices();
+  void clearSpherePoints();
 };

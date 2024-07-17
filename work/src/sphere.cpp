@@ -11,7 +11,7 @@ void Sphere::latLongToCartesian(float lat, float lon, float &x, float &y,
 void Sphere::latLongToFunky(float lat, float lon, float &x, float &y, float &z,
                             float scale) {
 
-  float adjustedRadius = scale * m_radius;
+  float adjustedRadius = scale * m_radius; // do smth interesting here???
   x = adjustedRadius * cos(lat) * cos(lon);
   y = adjustedRadius * cos(lat) * sin(lon);
   z = adjustedRadius * sin(lat);
@@ -21,7 +21,7 @@ void Sphere::generateSpherePoints() {
   glm::vec3 **arr = new glm::vec3 *[m_latResolution + 1];
 
   for (int j = 0; j <= m_latResolution; j++) {
-    arr[j] = new glm::vec3[m_latResolution + 1];
+    arr[j] = new glm::vec3[m_longResolution + 1]; // malloc sig fault here when increasing lat/long
     for (int i = 0; i <= m_longResolution; i++) {
       // lon = 0,res -> 0, pi/2
       float lon = (i * 2 * glm::pi<float>()) / m_longResolution;
@@ -101,15 +101,16 @@ void Sphere::update() {
   makeIndices();
   createSphere();
   m_model.mesh = m_mb.build();
+  clearSpherePoints();
 }
 
-void Sphere::draw(const glm::mat4 &view, const glm::mat4 proj) {
-  m_model.draw(view, proj);
+void Sphere::clearSpherePoints() {
+    for (int j = 0; j <= m_latResolution; j++) {
+        delete[] m_points[j];
+    }
+    delete[] m_points;
 }
 
-Sphere::~Sphere() {
-  for (int j = 0; j <= m_latResolution; j++) {
-    delete[] m_points[j];
-  }
-  delete[] m_points;
+void Sphere::draw(const glm::mat4& view, const glm::mat4 proj) {
+    m_model.draw(view, proj);
 }
