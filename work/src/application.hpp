@@ -11,6 +11,7 @@
 #include "skeleton_model.hpp"
 
 #include "sphere.hpp"
+#include "sphere_cube.hpp"
 
 #include "basic_model.hpp"
 
@@ -43,7 +44,8 @@ private:
   // geometry
   basic_model m_model;
 
-  Sphere sphere;
+  Sphere m_core;
+  CubeSphere m_completion;
 
   // Core/Completion/Challenge (0,1,2)
   int m_stage = 0;

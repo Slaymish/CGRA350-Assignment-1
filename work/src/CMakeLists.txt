@@ -25,6 +25,11 @@ SET(sources
 	"sphere.cpp"
 
 	"basic_model.hpp"
+
+	"shape.hpp"
+
+	"sphere_cube.hpp"
+	"sphere_cube.cpp"
 )
 
 # Add executable target and link libraries

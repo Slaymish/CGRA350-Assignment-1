@@ -43,7 +43,8 @@ GLuint Application::createShader() {
 }
 
 Application::Application(GLFWwindow *window)
-    : m_window(window), sphere(createShader(), vec3(1, 0, 0)) {}
+    : m_window(window), m_core(createShader(), vec3(1, 0, 0)),
+      m_completion(createShader(), vec3(1, 0, 0)) {}
 
 void Application::render() {
 
@@ -82,7 +83,13 @@ void Application::render() {
   // m_model.draw(view, proj);
 
   // Draw generated sphere
-  sphere.draw(view, proj);
+  switch (m_stage) {
+  case 0:
+    m_core.draw(view, proj);
+    break;
+  case 1:
+    m_completion.draw(view, proj);
+  }
 }
 
 void Application::renderGUI() {
@@ -123,41 +130,46 @@ void Application::renderGUI() {
 
   ImGui::Separator();
 
-  static float sphereness = 0;
-
   switch (m_stage) {
   case 0:
     ImGui::Text("Core");
-    if (ImGui::SliderFloat("Radius", &sphere.m_radius, 1.0F, 100.0F)) {
-      if (sphere.m_radius <= 0) {
-        sphere.m_radius = 0.1;
+    if (ImGui::SliderFloat("Radius", &m_core.m_radius, 1.0F, 100.0F)) {
+      if (m_core.m_radius <= 0) {
+        m_core.m_radius = 0.1;
       }
-      sphere.update();
+      m_core.update();
     }
 
-    if (ImGui::InputInt("Longitude Divisions", &sphere.m_longResolution)) {
-      if (sphere.m_longResolution <= 0) {
-        sphere.m_longResolution = 1;
+    if (ImGui::InputInt("Longitude Divisions", &m_core.m_longResolution)) {
+      if (m_core.m_longResolution <= 0) {
+        m_core.m_longResolution = 1;
       }
-      sphere.update();
+      m_core.update();
     }
 
-    if (ImGui::InputInt("Latitude Divisions", &sphere.m_latResolution)) {
-      if (sphere.m_latResolution <= 0) {
-        sphere.m_latResolution = 1;
+    if (ImGui::InputInt("Latitude Divisions", &m_core.m_latResolution)) {
+      if (m_core.m_latResolution <= 0) {
+        m_core.m_latResolution = 1;
       }
-      sphere.update();
+      m_core.update();
     }
 
-    if (ImGui::Checkbox("Funky Sphere", &sphere.m_isFunkySphere)) {
-      sphere.update();
+    if (ImGui::Checkbox("Funky Sphere", &m_core.m_isFunkySphere)) {
+      m_core.update();
     }
     break;
   case 1:
     ImGui::Text("Completion");
 
-    if (ImGui::SliderFloat("Sphereness", &sphereness, 0, 1)) {
-      sphere.update();
+    if (ImGui::InputInt("Cube Resolution", &m_completion.m_cubeResolution)) {
+      if (m_completion.m_cubeResolution <= 0) {
+        m_completion.m_cubeResolution = 1;
+      }
+      m_completion.update();
+    }
+
+    if (ImGui::SliderFloat("Sphereness", &m_completion.m_sphereness, 0, 1)) {
+      m_completion.update();
     }
     break;
   case 2:

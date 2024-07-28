@@ -1,4 +1,7 @@
+#pragma once
+
 #include "sphere.hpp"
+#include "shape.hpp"
 #include <glm/gtc/constants.hpp>
 
 void Sphere::latLongToCartesian(float lat, float lon, float &x, float &y,
@@ -21,7 +24,8 @@ void Sphere::generateSpherePoints() {
   glm::vec3 **arr = new glm::vec3 *[m_latResolution + 1];
 
   for (int j = 0; j <= m_latResolution; j++) {
-    arr[j] = new glm::vec3[m_longResolution + 1]; // malloc sig fault here when increasing lat/long
+    arr[j] = new glm::vec3[m_longResolution +
+                           1]; // malloc sig fault here when increasing lat/long
     for (int i = 0; i <= m_longResolution; i++) {
       // lon = 0,res -> 0, pi/2
       float lon = (i * 2 * glm::pi<float>()) / m_longResolution;
@@ -44,6 +48,13 @@ void Sphere::generateSpherePoints() {
   }
 
   m_points = arr;
+}
+
+void Sphere::generateCubePoints() {
+  // Normallise cube points turns into sphere!!!!!
+  // 1. create cube points
+  // 2. Mix with sphere points (0,1)
+  // fill in cube/sphere
 }
 
 void Sphere::makeIndices() {
@@ -97,20 +108,18 @@ void Sphere::createSphere() {
 void Sphere::update() {
   // somehow reset mesh builder here?
   m_mb = cgra::mesh_builder();
+
   generateSpherePoints();
   makeIndices();
   createSphere();
-  m_model.mesh = m_mb.build();
   clearSpherePoints();
+
+  m_model.mesh = m_mb.build();
 }
 
 void Sphere::clearSpherePoints() {
-    for (int j = 0; j <= m_latResolution; j++) {
-        delete[] m_points[j];
-    }
-    delete[] m_points;
-}
-
-void Sphere::draw(const glm::mat4& view, const glm::mat4 proj) {
-    m_model.draw(view, proj);
+  for (int j = 0; j <= m_latResolution; j++) {
+    delete[] m_points[j];
+  }
+  delete[] m_points;
 }
