@@ -1,4 +1,8 @@
 
+#include <glm/glm.hpp>
+#include "cgra/cgra_mesh.hpp"
+
+
 #ifndef BASIC_MODEL
 #define BASIC_MODEL
 struct basic_model {
@@ -11,3 +15,4 @@ struct basic_model {
   void draw(const glm::mat4 &view, const glm::mat4 proj);
 };
 #endif
+

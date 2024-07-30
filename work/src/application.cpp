@@ -44,7 +44,8 @@ GLuint Application::createShader() {
 
 Application::Application(GLFWwindow *window)
     : m_window(window), m_core(createShader(), vec3(1, 0, 0)),
-      m_completion(createShader(), vec3(1, 0, 0)) {}
+      m_completion(createShader(), vec3(1, 0, 0)) {
+}
 
 void Application::render() {
 
@@ -118,10 +119,12 @@ void Application::renderGUI() {
 
   if (ImGui::Button("Core")) {
     setStage(0);
+    m_core.update();
   }
   ImGui::SameLine();
   if (ImGui::Button("Completion")) {
     setStage(1);
+    m_completion.update();
   }
   ImGui::SameLine();
   if (ImGui::Button("Challenge")) {
@@ -170,6 +173,10 @@ void Application::renderGUI() {
 
     if (ImGui::SliderFloat("Sphereness", &m_completion.m_sphereness, 0, 1)) {
       m_completion.update();
+    }
+
+    if (ImGui::Checkbox("Cube Normals", &m_completion.m_cubeNormals)) {
+        m_completion.update();
     }
     break;
   case 2:

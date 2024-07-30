@@ -14,7 +14,7 @@ public:
     m_model.draw(view, proj);
   }
 
-  virtual void update();
+  virtual void update() {};
 
 protected:
   glm::vec3 **m_points;

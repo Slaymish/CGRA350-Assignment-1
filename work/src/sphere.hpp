@@ -16,7 +16,9 @@
 class Sphere : public Shape {
 
 public:
-  Sphere(GLuint shader, glm::vec3 color) : Shape(shader, color) {}
+  Sphere(GLuint shader, glm::vec3 color) : Shape(shader, color) {
+      update();
+  }
 
   // Core Members
   int m_longResolution = 10;
@@ -24,17 +26,28 @@ public:
   float m_radius = 20;
   bool m_isFunkySphere = false;
 
+  void update() override {
+      // somehow reset mesh builder here?
+      m_mb = cgra::mesh_builder();
+
+      generateSpherePoints();
+      makeIndices();
+      createSphere();
+      clearSpherePoints();
+
+      m_model.mesh = m_mb.build();
+  }
+
 private:
   // 0 == regular sphere, 1 == funky sphere
 
   void latLongToCartesian(float lat, float lon, float &x, float &y, float &z);
   void generateSpherePoints();
-  void generateCubePoints();
 
   void latLongToFunky(float lat, float lon, float &x, float &y, float &z,
                       float scale);
 
   void createSphere();
   void makeIndices();
-  void clearSpherePoints();
+  void clearSpherePoints() const;
 };

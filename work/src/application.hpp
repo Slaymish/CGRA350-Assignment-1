@@ -70,4 +70,5 @@ public:
   void keyCallback(int key, int scancode, int action, int mods);
   void charCallback(unsigned int c);
   void setStage(int i);
+
 };

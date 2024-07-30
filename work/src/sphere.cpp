@@ -3,6 +3,7 @@
 #include "sphere.hpp"
 #include "shape.hpp"
 #include <glm/gtc/constants.hpp>
+#include <application.hpp>
 
 void Sphere::latLongToCartesian(float lat, float lon, float &x, float &y,
                                 float &z) {
@@ -48,13 +49,6 @@ void Sphere::generateSpherePoints() {
   }
 
   m_points = arr;
-}
-
-void Sphere::generateCubePoints() {
-  // Normallise cube points turns into sphere!!!!!
-  // 1. create cube points
-  // 2. Mix with sphere points (0,1)
-  // fill in cube/sphere
 }
 
 void Sphere::makeIndices() {
@@ -105,19 +99,8 @@ void Sphere::createSphere() {
   }
 }
 
-void Sphere::update() {
-  // somehow reset mesh builder here?
-  m_mb = cgra::mesh_builder();
 
-  generateSpherePoints();
-  makeIndices();
-  createSphere();
-  clearSpherePoints();
-
-  m_model.mesh = m_mb.build();
-}
-
-void Sphere::clearSpherePoints() {
+void Sphere::clearSpherePoints() const {
   for (int j = 0; j <= m_latResolution; j++) {
     delete[] m_points[j];
   }
