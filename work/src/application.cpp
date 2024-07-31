@@ -20,31 +20,33 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
-void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
-  mat4 modelview = view * modelTransform;
 
-  glUseProgram(shader); // load shader and variables
-  glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1,
-                     false, value_ptr(proj));
-  glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false,
-                     value_ptr(modelview));
-  glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(color));
 
-  mesh.draw(); // draw
+void Application::createShaders() {
+  shaders.push_back(loadShader("//res//shaders//color_vert.glsl",
+                               "//res//shaders//color_frag.glsl"));
+
+  shaders.push_back(loadShader("//res//shaders//color_vert.glsl",
+                               "//res//shaders//cook_torrence_frag.glsl"));
 }
 
-GLuint Application::createShader() {
+GLuint Application::loadShader(std::string vert_path, std::string frag_path) {
   shader_builder sb;
-  sb.set_shader(GL_VERTEX_SHADER,
-                CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
-  sb.set_shader(GL_FRAGMENT_SHADER,
-                CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
+
+  sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + vert_path);
+  sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + frag_path);
+
   return sb.build();
 }
 
-Application::Application(GLFWwindow *window)
-    : m_window(window), m_core(createShader(), vec3(1, 0, 0)),
-      m_completion(createShader(), vec3(1, 0, 0)) {
+Application::Application(GLFWwindow *window) {
+  m_window = window;
+
+  createShaders(); // creates the shaders vec
+  m_core = Sphere(&shaders, vec3(1, 0, 0), &m_currentShader);
+  m_completion = CubeSphere(&shaders, vec3(1, 0, 0), &m_currentShader);
+
+  std::cout << "Init complete :D" << std::endl;
 }
 
 void Application::render() {
@@ -97,7 +99,7 @@ void Application::renderGUI() {
 
   // setup window
   ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
-  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
+  ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiSetCond_Once);
   ImGui::Begin("Options", 0);
 
   // display current camera parameters
@@ -116,6 +118,18 @@ void Application::renderGUI() {
   ImGui::SameLine();
   if (ImGui::Button("Screenshot"))
     rgba_image::screenshot(true);
+
+  if (ImGui::Button("Basic")) {
+    m_currentShader = 0;
+    m_core.update();
+    m_completion.update();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Cook Torrence")) {
+    m_currentShader = 1;
+    m_completion.update();
+    m_core.update();
+  }
 
   if (ImGui::Button("Core")) {
     setStage(0);
@@ -136,7 +150,7 @@ void Application::renderGUI() {
   switch (m_stage) {
   case 0:
     ImGui::Text("Core");
-    if (ImGui::SliderFloat("Radius", &m_core.m_radius, 1.0F, 100.0F)) {
+    if (ImGui::SliderFloat("Radius", &m_core.m_radius, 1.0F, 50.0F)) {
       if (m_core.m_radius <= 0) {
         m_core.m_radius = 0.1;
       }
@@ -164,6 +178,13 @@ void Application::renderGUI() {
   case 1:
     ImGui::Text("Completion");
 
+    if (ImGui::SliderFloat("Radius", &m_completion.m_radius, 1.0F, 50.0F)) {
+      if (m_completion.m_radius <= 0) {
+        m_completion.m_radius = 0.1;
+      }
+      m_completion.update();
+    }
+
     if (ImGui::InputInt("Cube Resolution", &m_completion.m_cubeResolution)) {
       if (m_completion.m_cubeResolution <= 0) {
         m_completion.m_cubeResolution = 1;
@@ -176,7 +197,7 @@ void Application::renderGUI() {
     }
 
     if (ImGui::Checkbox("Cube Normals", &m_completion.m_cubeNormals)) {
-        m_completion.update();
+      m_completion.update();
     }
     break;
   case 2:

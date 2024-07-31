@@ -16,26 +16,31 @@
 class Sphere : public Shape {
 
 public:
-  Sphere(GLuint shader, glm::vec3 color) : Shape(shader, color) {
-      update();
+  Sphere() {}
+
+  Sphere(std::vector<GLuint> *shaders, glm::vec3 color, int *currentShader)
+      : Shape(shaders, color, currentShader) {
+    update();
   }
 
   // Core Members
   int m_longResolution = 10;
   int m_latResolution = 10;
-  float m_radius = 20;
   bool m_isFunkySphere = false;
 
   void update() override {
-      // somehow reset mesh builder here?
-      m_mb = cgra::mesh_builder();
+    // somehow reset mesh builder here?
+    m_mb = cgra::mesh_builder();
 
-      generateSpherePoints();
-      makeIndices();
-      createSphere();
-      clearSpherePoints();
+    generateSpherePoints();
+    makeIndices();
+    createSphere();
+    clearSpherePoints();
 
-      m_model.mesh = m_mb.build();
+    m_model.color = m_color;
+    m_model.shader = (*shaders)[(*m_currentShader)];
+
+    m_model.mesh = m_mb.build();
   }
 
 private:
