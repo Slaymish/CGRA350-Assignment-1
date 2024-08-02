@@ -46,6 +46,7 @@ Application::Application(GLFWwindow *window) {
   createShaders(); // creates the shaders vec
   m_core = Sphere(&shaders, vec3(1, 0, 0), &m_currentShader);
   m_completion = CubeSphere(&shaders, vec3(1, 0, 0), &m_currentShader);
+  m_challenge = Torus(&shaders, vec3(1, 0, 0), &m_currentShader);
 
   std::cout << "Init complete :D" << std::endl;
 }
@@ -105,6 +106,10 @@ void Application::render() {
     break;
   case 1:
     m_completion.draw(view, proj);
+    break;
+  case 2:
+    m_challenge.draw(view,proj);
+    break;
   }
 }
 
@@ -136,18 +141,21 @@ void Application::renderGUI() {
     m_currentShader = 0;
     m_core.update();
     m_completion.update();
+    m_challenge.update();
   }
   ImGui::SameLine();
   if (ImGui::Button("Cook-Torrance")) {
     m_currentShader = 1;
     m_completion.update();
     m_core.update();
+    m_challenge.update();
   }
   ImGui::SameLine();
   if (ImGui::Button("Oren-Nayar")) {
     m_currentShader = 2;
     m_completion.update();
     m_core.update();
+    m_challenge.update();
   }
 
   // Add uniform controls
@@ -172,6 +180,7 @@ void Application::renderGUI() {
   ImGui::SameLine();
   if (ImGui::Button("Challenge")) {
     setStage(2);
+    m_challenge.update();
   }
 
   ImGui::Separator();
@@ -231,7 +240,30 @@ void Application::renderGUI() {
     break;
   case 2:
     ImGui::Text("Challenge");
-
+    if (ImGui::SliderFloat("Major Radius", &m_challenge.m_majorRadius,1.0F,50.0F)) {
+      if (m_challenge.m_majorRadius <= 0) {
+        m_challenge.m_majorRadius = 1;
+      }
+      m_challenge.update();
+    }
+    if (ImGui::SliderFloat("Minor Radius", &m_challenge.m_minorRadius,1.0F,50.0F)) {
+      if (m_challenge.m_minorRadius <= 0) {
+        m_challenge.m_minorRadius = 1;
+      }
+      m_challenge.update();
+    }
+    if (ImGui::InputInt("Major Segments", &m_challenge.m_majorSegments)) {
+      if (m_challenge.m_majorSegments <= 0) {
+        m_challenge.m_majorSegments = 1;
+      }
+      m_challenge.update();
+    }
+    if (ImGui::InputInt("Minor Segments", &m_challenge.m_minorSegments)) {
+      if (m_challenge.m_minorSegments <= 0) {
+        m_challenge.m_minorSegments = 1;
+      }
+      m_challenge.update();
+    }
     break;
   }
 

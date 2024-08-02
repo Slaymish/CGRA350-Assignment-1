@@ -30,6 +30,9 @@ SET(sources
 
 	"sphere_cube.hpp"
 	"sphere_cube.cpp"
+
+	"torus.hpp"
+	"torus.cpp"
 )
 
 # Add executable target and link libraries
