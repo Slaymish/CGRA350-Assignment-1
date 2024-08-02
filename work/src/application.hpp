@@ -53,6 +53,13 @@ private:
   std::vector<GLuint> shaders;
   int m_currentShader = 0;
 
+  // Shader uniforms
+  float m_roughness = 0.5f;
+  float m_F0 = 0.04f;
+  glm::vec3 m_lightPos = glm::vec3(5.0f, 5.0f, 5.0f);
+  float m_ambient = 0.1f;
+  glm::vec3 m_color = glm::vec3(1.0f, 0.0f, 0.0f);
+
   GLuint loadShader(std::string vert_path, std::string frag_path);
 
 public:
@@ -75,4 +82,20 @@ public:
   void keyCallback(int key, int scancode, int action, int mods);
   void charCallback(unsigned int c);
   void setStage(int i);
+
+  // uniforms
+  float getRoughness() const { return m_roughness; }
+  void setRoughness(float roughness) { m_roughness = roughness; }
+
+  float getF0() const { return m_F0; }
+  void setF0(float F0) { m_F0 = F0; }
+
+  glm::vec3 getLightPos() const { return m_lightPos; }
+  void setLightPos(const glm::vec3 &lightPos) { m_lightPos = lightPos; }
+
+  float getAmbient() const { return m_ambient; }
+  void setAmbient(float ambient) { m_ambient = ambient; }
+
+  glm::vec3 getColor() const { return m_color; }
+  void setColor(const glm::vec3 &color) { m_color = color; }
 };

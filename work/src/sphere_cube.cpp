@@ -12,9 +12,8 @@ void CubeSphere::generateCubePoints() {
 
   int idx = 0;
 
-  // Loop through each face of the cube
   for (int face = 0; face < 6; face++) {
-    // Loop through each row and column of the face
+    // through each row and column of the face
     for (int j = 0; j <= m_cubeResolution; j++) {
       for (int i = 0; i <= m_cubeResolution; i++) {
         // Calculate the x, y, z values based on the face and i, j
@@ -79,8 +78,8 @@ void CubeSphere::createCube() {
     for (int j = 0; j <= m_cubeResolution; j++) {
       for (int i = 0; i <= m_cubeResolution; i++) {
         glm::vec3 point = m_points[face * (m_cubeResolution + 1) + j][i];
+
         glm::vec3 normal;
-        // calc normal :D
         if (m_cubeNormals) {
           // Calculate normal using original cube vertex position
           switch (face) {
@@ -93,21 +92,42 @@ void CubeSphere::createCube() {
           case 2: // Left face
             normal = glm::vec3(-1, 0, 0);
             break;
-          case 3: // right
+          case 3: // Right face
             normal = glm::vec3(1, 0, 0);
             break;
-          case 4: // front
+          case 4: // Front face
             normal = glm::vec3(0, 0, -1);
             break;
-          case 5: // back
+          case 5: // Back face
             normal = glm::vec3(0, 0, 1);
             break;
           }
         } else {
-          normal = glm::normalize(point);
+          // Calculate normal using surrounding vertices
+          glm::vec3 a = point;
+          glm::vec3 b, c;
+
+          if (i < m_cubeResolution && j < m_cubeResolution) {
+            b = m_points[face * (m_cubeResolution + 1) + j][i + 1];
+            c = m_points[face * (m_cubeResolution + 1) + j + 1][i];
+          } else if (i == m_cubeResolution && j < m_cubeResolution) {
+            b = m_points[face * (m_cubeResolution + 1) + j][i - 1];
+            c = m_points[face * (m_cubeResolution + 1) + j + 1][i];
+          } else if (i < m_cubeResolution && j == m_cubeResolution) {
+            b = m_points[face * (m_cubeResolution + 1) + j][i + 1];
+            c = m_points[face * (m_cubeResolution + 1) + j - 1][i];
+          } else {
+            b = m_points[face * (m_cubeResolution + 1) + j][i - 1];
+            c = m_points[face * (m_cubeResolution + 1) + j - 1][i];
+          }
+
+          normal = glm::normalize(glm::cross(b - a, c - a));
+
+          // average adj normals
         }
-        float u = static_cast<float>(i) / (m_cubeResolution);
-        float v = static_cast<float>(j) / (m_cubeResolution);
+
+        float u = static_cast<float>(i) / m_cubeResolution;
+        float v = static_cast<float>(j) / m_cubeResolution;
 
         m_mb.push_vertex(cgra::mesh_vertex{point, normal, glm::vec2(u, v)});
         idx++;

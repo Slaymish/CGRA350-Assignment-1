@@ -20,14 +20,15 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
-
-
 void Application::createShaders() {
   shaders.push_back(loadShader("//res//shaders//color_vert.glsl",
                                "//res//shaders//color_frag.glsl"));
 
   shaders.push_back(loadShader("//res//shaders//color_vert.glsl",
                                "//res//shaders//cook_torrence_frag.glsl"));
+
+  shaders.push_back(loadShader("//res//shaders//color_vert.glsl",
+                               "//res//shaders//oren_nayar_frag.glsl"));
 }
 
 GLuint Application::loadShader(std::string vert_path, std::string frag_path) {
@@ -85,6 +86,18 @@ void Application::render() {
   // draw the model
   // m_model.draw(view, proj);
 
+  // Set uniform values for the current shader
+  glUseProgram(shaders[m_currentShader]);
+  glUniform1f(glGetUniformLocation(shaders[m_currentShader], "roughness"),
+              m_roughness);
+  glUniform1f(glGetUniformLocation(shaders[m_currentShader], "F0"), m_F0);
+  glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1,
+               glm::value_ptr(m_lightPos));
+  glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"),
+              m_ambient);
+  glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1,
+               glm::value_ptr(m_color));
+
   // Draw generated sphere
   switch (m_stage) {
   case 0:
@@ -125,10 +138,26 @@ void Application::renderGUI() {
     m_completion.update();
   }
   ImGui::SameLine();
-  if (ImGui::Button("Cook Torrence")) {
+  if (ImGui::Button("Cook-Torrance")) {
     m_currentShader = 1;
     m_completion.update();
     m_core.update();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Oren-Nayar")) {
+    m_currentShader = 2;
+    m_completion.update();
+    m_core.update();
+  }
+
+  // Add uniform controls
+  if (ImGui::CollapsingHeader("Shader Uniforms")) {
+    ImGui::ColorEdit3("Color", glm::value_ptr(m_color));
+    ImGui::SliderFloat("Roughness", &m_roughness, 0.0f, 1.0f);
+    ImGui::SliderFloat("F0", &m_F0, 0.0f, 1.0f);
+    ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f,
+                        10.0f);
+    ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
   }
 
   if (ImGui::Button("Core")) {
