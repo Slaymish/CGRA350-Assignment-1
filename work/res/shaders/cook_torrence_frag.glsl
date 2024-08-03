@@ -9,7 +9,7 @@ uniform float F0;
 uniform vec3 lightPos;
 uniform float ambient;
 
-// Viewspace data (this must match the output of the vertex shader)
+// Viewspace data
 in VertexData {
     vec3 position;
     vec3 normal;
@@ -48,7 +48,7 @@ void main() {
     // Combine the Cook-Torrance BRDF terms
     float specular = (D * F * G) / (4.0 * NdotV * NdotL + 0.0001);
 
-    // Add diffuse term (optional, for energy conservation you might want to scale this by 1 - F)
+    // Add diffuse term (scaled by 1 - F for energy conservation)
     float diffuse = (1.0 - F) * (1.0 / 3.14159265359);
 
     // Combine the results

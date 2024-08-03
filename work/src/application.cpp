@@ -29,6 +29,9 @@ void Application::createShaders() {
 
   shaders.push_back(loadShader("//res//shaders//color_vert.glsl",
                                "//res//shaders//oren_nayar_frag.glsl"));
+
+  shaders.push_back(loadShader("//res//shaders//comp_vert.glsl",
+                               "//res//shaders//comp_frag.glsl"));
 }
 
 GLuint Application::loadShader(std::string vert_path, std::string frag_path) {
@@ -40,10 +43,23 @@ GLuint Application::loadShader(std::string vert_path, std::string frag_path) {
   return sb.build();
 }
 
+void Application::loadTextures() {
+    // Load and upload texture
+    cgra::rgba_image textureImage(CGRA_SRCDIR + std::string("//res//textures//checkerboard.jpg"));
+    m_textureID = textureImage.uploadTexture();
+
+    // Load and upload normal map
+    cgra::rgba_image normalMapImage(CGRA_SRCDIR + std::string("//res//textures//checkerboard.jpg"));
+    m_normalMapID = normalMapImage.uploadTexture();
+}
+
+
 Application::Application(GLFWwindow *window) {
   m_window = window;
 
   createShaders(); // creates the shaders vec
+  loadTextures();
+
   m_core = Sphere(&shaders, vec3(1, 0, 0), &m_currentShader);
   m_completion = CubeSphere(&shaders, vec3(1, 0, 0), &m_currentShader);
   m_challenge = Torus(&shaders, vec3(1, 0, 0), &m_currentShader);
@@ -84,20 +100,43 @@ void Application::render() {
     drawAxis(view, proj);
   glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
-  // draw the model
-  // m_model.draw(view, proj);
-
   // Set uniform values for the current shader
   glUseProgram(shaders[m_currentShader]);
-  glUniform1f(glGetUniformLocation(shaders[m_currentShader], "roughness"),
-              m_roughness);
-  glUniform1f(glGetUniformLocation(shaders[m_currentShader], "F0"), m_F0);
-  glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1,
-               glm::value_ptr(m_lightPos));
-  glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"),
-              m_ambient);
-  glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1,
-               glm::value_ptr(m_color));
+
+  switch (m_currentShader) {
+      case 0: // default shader
+          // Set default shader uniform values here if needed
+          break;
+      case 1: // cook torrence
+          glUniform1f(glGetUniformLocation(shaders[m_currentShader], "roughness"), m_roughness);
+          glUniform1f(glGetUniformLocation(shaders[m_currentShader], "F0"), m_F0);
+          glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1, glm::value_ptr(m_lightPos));
+          glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"), m_ambient);
+          glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1, glm::value_ptr(m_color));
+          break;
+      case 2: // oren nayar
+          glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1, glm::value_ptr(m_color));
+          glUniform1f(glGetUniformLocation(shaders[m_currentShader], "roughness"), m_roughness);
+          glUniform1f(glGetUniformLocation(shaders[m_currentShader], "sigma"), m_sigma);  // Set sigma value
+          glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1, glm::value_ptr(m_lightPos));
+          glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"), m_ambient);
+          break;
+      case 3: // textured
+        glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1, glm::value_ptr(m_color));
+        glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1, glm::value_ptr(m_lightPos));
+        glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"), m_ambient);
+
+        // Bind textures
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_textureID);
+        glUniform1i(glGetUniformLocation(shaders[m_currentShader], "texture_diffuse"), 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, m_normalMapID);
+        glUniform1i(glGetUniformLocation(shaders[m_currentShader], "texture_normal"), 1);
+        break;
+    }
+
 
   // Draw generated sphere
   switch (m_stage) {
@@ -111,6 +150,13 @@ void Application::render() {
     m_challenge.draw(view,proj);
     break;
   }
+}
+
+void Application::setShader(int i){
+  m_currentShader = i;
+  m_core.update();
+  m_completion.update();
+  m_challenge.update();
 }
 
 void Application::renderGUI() {
@@ -138,35 +184,58 @@ void Application::renderGUI() {
     rgba_image::screenshot(true);
 
   if (ImGui::Button("Basic")) {
-    m_currentShader = 0;
-    m_core.update();
-    m_completion.update();
-    m_challenge.update();
+    setShader(0);
   }
   ImGui::SameLine();
   if (ImGui::Button("Cook-Torrance")) {
-    m_currentShader = 1;
-    m_completion.update();
-    m_core.update();
-    m_challenge.update();
+    setShader(1);
   }
   ImGui::SameLine();
   if (ImGui::Button("Oren-Nayar")) {
-    m_currentShader = 2;
-    m_completion.update();
-    m_core.update();
-    m_challenge.update();
+    setShader(2);
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Textured")) {
+    setShader(3);
   }
 
+
+
   // Add uniform controls
-  if (ImGui::CollapsingHeader("Shader Uniforms")) {
-    ImGui::ColorEdit3("Color", glm::value_ptr(m_color));
-    ImGui::SliderFloat("Roughness", &m_roughness, 0.0f, 1.0f);
-    ImGui::SliderFloat("F0", &m_F0, 0.0f, 1.0f);
-    ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f,
-                        10.0f);
-    ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
+if (ImGui::CollapsingHeader("Shader Uniforms")) {
+  if (ImGui::ColorEdit3("Color", glm::value_ptr(m_color))) {
+    glUseProgram(shaders[m_currentShader]);
+    glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1, glm::value_ptr(m_color));
   }
+
+  switch (m_currentShader) {
+      case 0: // default shader
+          // Add default shader uniform controls here if needed
+          break;
+      case 1: // cook torrence
+          ImGui::ColorEdit3("Color", glm::value_ptr(m_color));
+          ImGui::SliderFloat("Roughness", &m_roughness, 0.0f, 1.0f);
+          ImGui::SliderFloat("F0", &m_F0, 0.0f, 1.0f);
+          ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f, 10.0f);
+          ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
+          break;
+      case 2: // oren nayar
+          ImGui::ColorEdit3("Albedo", glm::value_ptr(m_color));
+          ImGui::SliderFloat("Sigma", &m_sigma, 0.0f, 1.0f);
+          ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f, 10.0f);
+          ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
+          break;
+      case 3: // textured
+          ImGui::ColorEdit3("Color", glm::value_ptr(m_color));
+          ImGui::SliderFloat("Roughness", &m_roughness, 0.0f, 1.0f);
+          ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f, 10.0f);
+          ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
+          ImGui::SliderFloat("Specular", &m_specular, 0.0f, 1.0f);
+          ImGui::Checkbox("Use Normal Map", &m_useNormalMap);
+          break;
+    }
+}
+
 
   if (ImGui::Button("Core")) {
     setStage(0);
@@ -240,13 +309,13 @@ void Application::renderGUI() {
     break;
   case 2:
     ImGui::Text("Challenge");
-    if (ImGui::SliderFloat("Major Radius", &m_challenge.m_majorRadius,1.0F,50.0F)) {
+    if (ImGui::SliderFloat("Major Radius", &m_challenge.m_majorRadius,1.0F,10.0F)) {
       if (m_challenge.m_majorRadius <= 0) {
         m_challenge.m_majorRadius = 1;
       }
       m_challenge.update();
     }
-    if (ImGui::SliderFloat("Minor Radius", &m_challenge.m_minorRadius,1.0F,50.0F)) {
+    if (ImGui::SliderFloat("Minor Radius", &m_challenge.m_minorRadius,1.0F,10.0F)) {
       if (m_challenge.m_minorRadius <= 0) {
         m_challenge.m_minorRadius = 1;
       }

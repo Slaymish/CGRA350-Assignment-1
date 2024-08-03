@@ -61,8 +61,17 @@ private:
   glm::vec3 m_lightPos = glm::vec3(5.0f, 5.0f, 5.0f);
   float m_ambient = 0.1f;
   glm::vec3 m_color = glm::vec3(1.0f, 0.0f, 0.0f);
+  float m_sigma = 0.1f;
+  float m_specular = 0.0f;
+
+  bool m_useNormalMap = false;
 
   GLuint loadShader(std::string vert_path, std::string frag_path);
+  void loadTextures();
+
+  GLuint m_textureID;
+  GLuint m_normalMapID;
+
 
 public:
   // setup
@@ -75,6 +84,9 @@ public:
   // rendering callbacks (every frame)
   void render();
   void renderGUI();
+
+
+  void setShader(int i);
 
   // input callbacks
   void createShaders();

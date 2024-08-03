@@ -7,6 +7,7 @@ uniform vec3 uColor;
 uniform float roughness;
 uniform vec3 lightPos;
 uniform float ambient;
+uniform float sigma;  // Added sigma uniform
 
 // Viewspace data (this must match the output of the vertex shader)
 in VertexData {
@@ -34,7 +35,7 @@ void main() {
     float alpha = max(angleVN, angleLN);
     float beta = min(angleVN, angleLN);
     
-    float sigma2 = roughness * roughness;
+    float sigma2 = sigma * sigma;  // Use sigma for calculations
     float A = 1.0 - 0.5 * (sigma2 / (sigma2 + 0.33));
     float B = 0.45 * (sigma2 / (sigma2 + 0.09));
 
