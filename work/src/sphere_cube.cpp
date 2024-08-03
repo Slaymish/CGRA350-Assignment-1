@@ -102,7 +102,7 @@ void CubeSphere::createCube() {
             normal = glm::vec3(0, 0, 1);
             break;
           }
-        } else {
+        } else if (m_sphereness < 0.999){
           // Calculate normal using surrounding vertices
           glm::vec3 a = point;
           glm::vec3 b, c;
@@ -124,6 +124,8 @@ void CubeSphere::createCube() {
           normal = glm::normalize(glm::cross(b - a, c - a));
 
           // average adj normals
+        } else {
+          normal = glm::normalize(point);
         }
 
         float u = static_cast<float>(i) / m_cubeResolution;

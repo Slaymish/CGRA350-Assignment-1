@@ -49,7 +49,7 @@ void Application::loadTextures() {
     m_textureID = textureImage.uploadTexture();
 
     // Load and upload normal map
-    cgra::rgba_image normalMapImage(CGRA_SRCDIR + std::string("//res//textures//checkerboard.jpg"));
+    cgra::rgba_image normalMapImage(CGRA_SRCDIR + std::string("//res//textures//normal.png"));
     m_normalMapID = normalMapImage.uploadTexture();
 }
 
@@ -102,6 +102,7 @@ void Application::render() {
 
   // Set uniform values for the current shader
   glUseProgram(shaders[m_currentShader]);
+  glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1, glm::value_ptr(m_color));
 
   switch (m_currentShader) {
       case 0: // default shader
@@ -112,17 +113,14 @@ void Application::render() {
           glUniform1f(glGetUniformLocation(shaders[m_currentShader], "F0"), m_F0);
           glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1, glm::value_ptr(m_lightPos));
           glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"), m_ambient);
-          glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1, glm::value_ptr(m_color));
           break;
       case 2: // oren nayar
-          glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1, glm::value_ptr(m_color));
           glUniform1f(glGetUniformLocation(shaders[m_currentShader], "roughness"), m_roughness);
           glUniform1f(glGetUniformLocation(shaders[m_currentShader], "sigma"), m_sigma);  // Set sigma value
           glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1, glm::value_ptr(m_lightPos));
           glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"), m_ambient);
           break;
       case 3: // textured
-        glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "uColor"), 1, glm::value_ptr(m_color));
         glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1, glm::value_ptr(m_lightPos));
         glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"), m_ambient);
 
@@ -213,20 +211,17 @@ if (ImGui::CollapsingHeader("Shader Uniforms")) {
           // Add default shader uniform controls here if needed
           break;
       case 1: // cook torrence
-          ImGui::ColorEdit3("Color", glm::value_ptr(m_color));
           ImGui::SliderFloat("Roughness", &m_roughness, 0.0f, 1.0f);
           ImGui::SliderFloat("F0", &m_F0, 0.0f, 1.0f);
           ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f, 10.0f);
           ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
           break;
       case 2: // oren nayar
-          ImGui::ColorEdit3("Albedo", glm::value_ptr(m_color));
           ImGui::SliderFloat("Sigma", &m_sigma, 0.0f, 1.0f);
           ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f, 10.0f);
           ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
           break;
       case 3: // textured
-          ImGui::ColorEdit3("Color", glm::value_ptr(m_color));
           ImGui::SliderFloat("Roughness", &m_roughness, 0.0f, 1.0f);
           ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f, 10.0f);
           ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
