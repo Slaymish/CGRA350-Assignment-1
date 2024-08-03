@@ -68,9 +68,15 @@ private:
 
   GLuint loadShader(std::string vert_path, std::string frag_path);
   void loadTextures();
+  void initializeShadowMapping();
 
   GLuint m_textureID;
   GLuint m_normalMapID;
+
+  GLuint m_shadowMapFBO;
+  GLuint m_shadowMapTexture;
+  GLuint m_shadowMapShader;
+  glm::mat4 m_lightSpaceMatrix;
 
 
 public:

@@ -53,6 +53,36 @@ void Application::loadTextures() {
     m_normalMapID = normalMapImage.uploadTexture();
 }
 
+void Application::initializeShadowMapping() {
+  // Create framebuffer
+  glGenFramebuffers(1, &m_shadowMapFBO);
+
+  // Create texture
+  glGenTextures(1, &m_shadowMapTexture);
+  glBindTexture(GL_TEXTURE_2D, m_shadowMapTexture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+  // Attach texture to framebuffer
+  glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFBO);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMapTexture, 0);
+  glDrawBuffer(GL_NONE);
+  glReadBuffer(GL_NONE);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  // Load shadow mapping shaders
+  m_shadowMapShader = loadShader("shadow_map_vert.glsl", "shadow_map_frag.glsl");
+
+  // Calculate light space matrix
+  glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
+  glm::mat4 lightView = glm::lookAt(m_lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+  m_lightSpaceMatrix = lightProjection * lightView;
+}
 
 Application::Application(GLFWwindow *window) {
   m_window = window;
