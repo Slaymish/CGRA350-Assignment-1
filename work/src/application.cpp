@@ -53,7 +53,7 @@ void Application::loadTextures() {
     m_normalMapID = normalMapImage.uploadTexture();
 }
 
-void Application::initializeShadowMapping() {
+void Application::initialiseShadowMapping() {
   // Create framebuffer
   glGenFramebuffers(1, &m_shadowMapFBO);
 
@@ -145,7 +145,6 @@ void Application::render() {
           glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"), m_ambient);
           break;
       case 2: // oren nayar
-          glUniform1f(glGetUniformLocation(shaders[m_currentShader], "roughness"), m_roughness);
           glUniform1f(glGetUniformLocation(shaders[m_currentShader], "sigma"), m_sigma);  // Set sigma value
           glUniform3fv(glGetUniformLocation(shaders[m_currentShader], "lightPos"), 1, glm::value_ptr(m_lightPos));
           glUniform1f(glGetUniformLocation(shaders[m_currentShader], "ambient"), m_ambient);
@@ -255,8 +254,6 @@ if (ImGui::CollapsingHeader("Shader Uniforms")) {
           ImGui::SliderFloat("Roughness", &m_roughness, 0.0f, 1.0f);
           ImGui::SliderFloat3("Light Position", glm::value_ptr(m_lightPos), -10.0f, 10.0f);
           ImGui::SliderFloat("Ambient", &m_ambient, 0.0f, 1.0f);
-          ImGui::SliderFloat("Specular", &m_specular, 0.0f, 1.0f);
-          ImGui::Checkbox("Use Normal Map", &m_useNormalMap);
           break;
     }
 }

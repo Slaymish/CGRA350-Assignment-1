@@ -11,7 +11,7 @@ public:
 
 
   Torus(std::vector<GLuint> *shaders, glm::vec3 color, int *currentShader,
-          float majorRadius = 1.0f, float minorRadius = 0.3f,
+          float majorRadius = 7.0f, float minorRadius = 3.0f,
           int majorSegments = 32, int minorSegments = 24)
         : Shape(shaders, color, currentShader),
           m_majorRadius(majorRadius), m_minorRadius(minorRadius),

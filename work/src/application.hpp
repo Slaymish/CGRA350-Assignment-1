@@ -62,13 +62,10 @@ private:
   float m_ambient = 0.1f;
   glm::vec3 m_color = glm::vec3(1.0f, 0.0f, 0.0f);
   float m_sigma = 0.1f;
-  float m_specular = 0.0f;
-
-  bool m_useNormalMap = false;
 
   GLuint loadShader(std::string vert_path, std::string frag_path);
   void loadTextures();
-  void initializeShadowMapping();
+  void initialiseShadowMapping();
 
   GLuint m_textureID;
   GLuint m_normalMapID;

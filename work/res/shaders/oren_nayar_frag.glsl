@@ -4,7 +4,6 @@
 uniform mat4 uProjectionMatrix;
 uniform mat4 uModelViewMatrix;
 uniform vec3 uColor;
-uniform float roughness;
 uniform vec3 lightPos;
 uniform float ambient;
 uniform float sigma;  // Added sigma uniform
